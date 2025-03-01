@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id "org.openapi.generator" version "7.10.0"
+}
+
+group = 'org.test'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+ def openApiSpec =  "$projectDir/api/openapi.yaml".toString()
+def openApiTargetDir = "${layout.buildDirectory.get().asFile}/generated/api"
+openApiValidate {
+    inputSpec.set(openApiSpec)
+}
+
+
+openApiGenerate {
+    inputSpec.set(openApiSpec)
+    generatorName ='spring'
+    generateApiDocumentation = false
+    generateModelDocumentation = false
+    outputDir=openApiTargetDir
+    apiPackage="org.test.monitor_sensors.openapi.api"
+    modelPackage="org.test.monitor_sensors.openapi.model"
+    validateSpec = true
+    configOptions = [
+            serializableModel      : 'true',
+            hideGenerationTimestamp: 'true',
+            interfaceOnly          : 'true',
+            booleanGetterPrefix    : 'get',
+            openApiNullable        : 'true',
+            useSpringBoot3         : 'true',
+            useTags                : 'true',
+    ]
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'org.projectlombok:lombok'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final",
+            "org.projectlombok:lombok",
+            "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+sourceSets.main.java.srcDirs += openApiTargetDir
+sourceSets.main.java.srcDirs += "$openApiTargetDir/src/main/java"

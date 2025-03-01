@@ -1,0 +1,223 @@
+openapi: 3.0.0
+info:
+  title: Swagger
+  description: Круд операции для sensors
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+servers:
+  - url: localhost:8090/monitorsensors/
+    description: путь к сервису
+tags:
+  - name: sensors
+    description: Круд операции для sensors
+security:
+  - basicHttpAuth: []
+paths:
+  /sensors/:
+    put:
+      security:
+        - basicHttpAuth: []
+      tags:
+        - sensors
+      summary: Обновление сущности
+      description: Обновление сущности по id
+      operationId: updateSensor
+      requestBody:
+        description: Обновление сущности
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorDto'
+        required: true
+      responses:
+        '200':
+          description: Обновленная сущность
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorDto'
+        '400':
+          description: Ошибка валидации
+        '404':
+          description: Сущность не найдена
+    post:
+      security:
+        - basicHttpAuth: []
+      tags:
+        - sensors
+      summary: Создание сущности
+      description: Создание сущности
+      operationId: addSensor
+      requestBody:
+        description: Создание новой сущности
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorDto'
+        required: true
+      responses:
+        '200':
+          description: Созданная сущность
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorDto'
+        '400':
+          description: Ошибка валидации
+  /sensors/find:
+    get:
+      security:
+        - basicHttpAuth: []
+      tags:
+        - sensors
+      summary: Поиск sensors
+      description: Поиск sensors
+      operationId: findSensors
+      parameters:
+        - name: name
+          in: query
+          description: поиск по имени
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: model
+          in: query
+          description: поиск по типу модели
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: номер страницы
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindSensorDto'
+        '400':
+          description: Ошибка валидации
+  /sensors/{sensorId}:
+    get:
+      security:
+        - basicHttpAuth: []
+      tags:
+        - sensors
+      summary: Поиск по id
+      description: Возвращает sensor
+      operationId: getSensorById
+      parameters:
+        - name: sensorId
+          in: path
+          description: ID to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Найденная сущность
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorDto'
+        '400':
+          description: Ошибка валидации
+        '404':
+          description: Сущность не найдена
+    delete:
+      security:
+        - basicHttpAuth: []
+      tags:
+        - sensors
+      summary: Удалить по id
+      description: Удалить по id
+      operationId: deleteSensor
+      parameters:
+        - name: sensorId
+          in: path
+          description: id для удаления
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '400':
+          description: Ошибка валидации
+components:
+  securitySchemes:
+    basicHttpAuth:
+      description: Авторизация
+      type: http
+      scheme: Basic
+  schemas:
+    SensorDto:
+      type: object
+      required:
+        - name
+        - model
+        - type
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+          maxLength: 30
+        model:
+          type: string
+          minLength: 1
+          maxLength: 15
+        range:
+          $ref: "#/components/schemas/RangeDto"
+        type:
+          type: string
+          enum:
+            - pressure
+            - voltage
+            - temperature
+            - humidity
+        unit:
+          type: string
+          enum:
+            - bar
+            - voltage
+            - C
+            - '%'
+        location:
+          type: string
+        description:
+          type: string
+    RangeDto:
+      type: object
+      required:
+        - to
+      properties:
+        id:
+          type: string
+          format: uuid
+        from:
+          type: integer
+          minimum: 0
+        to:
+          type: integer
+          minimum: 0
+    FindSensorDto:
+      type: object
+      properties:
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SensorDto'
+        page:
+          type: integer
+
