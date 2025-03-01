@@ -3,6 +3,7 @@
 
 авторизация осуществляется через basic auth 
 пользователи 
+
 role: VIEWER 
 user: user
 passw: user
